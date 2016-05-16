@@ -1,0 +1,15 @@
+{
+  "name": "Trello Setlist Utility",
+  "version": "0.1",
+  "description": "Allows user to copy a trello list to the clipboard as plain text.",
+  "icons": { "128": "icon.png" },
+  
+  "content_scripts": [
+    { 
+      "matches": ["https://trello.com/b/*/*"], 
+      "js": ["jquery-2.2.3.min.js", "arrive.min.js", "content_script.js"], 
+      "run_at": "document_end"
+    }
+  ],
+  "manifest_version": 2
+}
