@@ -31,10 +31,6 @@ function copyToClipboard() {
   //console.log(myRegEx.exec(listItems));
 }
 
-//.list
-//.list-cards
-//  .list-card
-
 $(document).arrive(".js-open-list-menu", addLastButtonListener);
 $(document).arrive(".pop-over-content", addLi);
 
