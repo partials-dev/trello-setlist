@@ -11,5 +11,7 @@
       "run_at": "document_end"
     }
   ],
+"permissions": ["notifications"],
+
   "manifest_version": 2
 }

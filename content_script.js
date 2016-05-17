@@ -20,6 +20,29 @@ function addLi() {
   $('#share').unbind('click').click(share);
 }
 
+// Notifications
+function clipboardNotification() {
+  // Check for browser support
+  if (!("Notification" in window)) {
+    alert("This browser does not support desktop notification");
+  }
+
+  // Check permissions
+  else if (Notification.permission === "granted") {
+    var notification = new Notification("List copied to clipboard!");
+  }
+
+  // Otherwise, we need to ask the user for permission
+  else if (Notification.permission !== 'denied') {
+    Notification.requestPermission(function (permission) {
+      // If the user accepts, let's create a notification
+      if (permission === "granted") {
+        var notification = new Notification("List copied to clipboard!");
+      }
+    });
+  }
+}
+
 // Option Functionality
 
 function getPlainText() {
@@ -41,6 +64,7 @@ function copyToClipboard () {
   document.execCommand('SelectAll');
   document.execCommand('Copy');
   document.body.removeChild(copyFrom);
+  clipboardNotification();
 }
 
 function share() {
