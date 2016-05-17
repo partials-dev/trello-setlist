@@ -11,8 +11,8 @@ function addLastButtonListener() {
 
 
 // Add Options to Menu
-function addLi() {  
-  $($('.pop-over-content .pop-over-list')[0]).append(
+function addLi($header) {  
+  $header.append(
     "<hr><li><a id='copy-to-clipboard'>Copy To Clipboard</a></li> <li><a id='share'>Share To... (WIP)</a></li>"
   );
 
@@ -21,27 +21,19 @@ function addLi() {
 }
 
 // Notifications
-function clipboardNotification() {
-  // Check for browser support
-  if (!("Notification" in window)) {
-    alert("This browser does not support desktop notification");
-  }
 
-  // Check permissions
-  else if (Notification.permission === "granted") {
-    var notification = new Notification("List copied to clipboard!");
-  }
+Notification.requestPermission().then(function(result) {
+  console.log(result);
+});
 
-  // Otherwise, we need to ask the user for permission
-  else if (Notification.permission !== 'denied') {
-    Notification.requestPermission(function (permission) {
-      // If the user accepts, let's create a notification
-      if (permission === "granted") {
-        var notification = new Notification("List copied to clipboard!");
-      }
-    });
-  }
+function spawnNotification(theBody, theIcon, theTitle) {
+  var options = {
+        body: theBody,
+        icon: theIcon
+    }
+  var n = new Notification(theTitle,options);
 }
+
 
 // Option Functionality
 
@@ -64,13 +56,21 @@ function copyToClipboard () {
   document.execCommand('SelectAll');
   document.execCommand('Copy');
   document.body.removeChild(copyFrom);
-  clipboardNotification();
-}
+  spawnNotification('List copied to clipboard!', null, 'Trello Setlist Utility');
+} 
 
 function share() {
   console.log('Share Button Clicked');
 }
 
 $(document).arrive(".js-open-list-menu", addLastButtonListener);
-$(document).arrive(".pop-over-content", addLi);
+$(document).arrive('.pop-over-header', function () {
+  var self = this;
+
+  setTimeout(function () {
+    if ($(self).find('.pop-over-header-title').contents()[0].data === "List Actions") {
+      addLi($(self).siblings().first().find('.pop-over-content .pop-over-list').first());
+    }
+  }, 50)
+});
 
