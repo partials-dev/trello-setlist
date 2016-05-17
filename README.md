@@ -3,7 +3,7 @@
 This is a simple, lightweight Chrome extension for extending Trello's functionality. It's intended for use in making concert setlists, but it could certainly find use elsewhere.
 
 ##### Features Finished:
-- None so far
+- Copy plaintext list to clipboard 
 
 ##### Features in Progress:
-- Copy plaintext list to clipboard 
+- Share to... (i.e. slack)

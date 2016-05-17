@@ -12,23 +12,39 @@ function addLastButtonListener() {
 
 // Add Options to Menu
 function addLi() {  
-  $($('.pop-over-content .pop-over-list')[0]).append("<hr><li><a id='copy-to-clipboard'>Copy To Clipboard</a></li>");
+  $($('.pop-over-content .pop-over-list')[0]).append(
+    "<hr><li><a id='copy-to-clipboard'>Copy To Clipboard</a></li> <li><a id='share'>Share To... (WIP)</a></li>"
+  );
+
   $('#copy-to-clipboard').unbind('click').click(copyToClipboard);
+  $('#share').unbind('click').click(share);
 }
 
 // Option Functionality
 
-function copyToClipboard() {
-  myRegEx = /"([^"]*)"/g;
-  var listItems = lastButtonClicked.closest('.list').find('.list-cards .list-card').find('.list-card-title').contents().filter(function(){ 
-    var filteredList = this.nodeType == 3; 
-    for (var i = 0; i < filteredList.length; i++) { 
-      console.log(filteredList[i].text());
-    };
-  })
+function getPlainText() {
+  var listItems = lastButtonClicked.closest('.list').find('.list-cards .list-card').find('.list-card-title').contents();
+  var filteredList = listItems.filter(function () { return this.nodeType === 3; });
   
-  console.log(listItems[1]);
-  //console.log(myRegEx.exec(listItems));
+  var plainText = "";
+  for (var i = 0; i < filteredList.length; i++) {
+    plainText += filteredList[i].data + "\n"
+  }
+  return plainText;
+}
+
+function copyToClipboard () {
+  var copyFrom = document.createElement("textarea");
+  copyFrom.textContent = getPlainText();
+  document.body.appendChild(copyFrom);
+  copyFrom.focus();
+  document.execCommand('SelectAll');
+  document.execCommand('Copy');
+  document.body.removeChild(copyFrom);
+}
+
+function share() {
+  console.log('Share Button Clicked');
 }
 
 $(document).arrive(".js-open-list-menu", addLastButtonListener);
