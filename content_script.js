@@ -41,7 +41,6 @@ function getPlainText() {
         var getColorRegEx = /card-label-([a-z]+?)/g;
         var regExColor = getColorRegEx.exec($(labelList.contents()[n]).attr('class'));
         label += " [" + regExColor[1].toUpperCase() + "]";
-        debugger;
       } else if ($(cards[i]).find('.card-label')[n]) {
         label += " [" + $(labelList.contents()[n]).text() + "]";
       }
