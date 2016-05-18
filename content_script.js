@@ -21,54 +21,90 @@ function listActionTimeout() {
 }
 
 function addLi($list) {  
-  // List Actions
+  // List Actions to add
   $list.append(
     "<hr>"
-    + "<li><a id='copy-to-clipboard'>Copy To Clipboard</a></li>" 
+    + "<li><a id='copy-list'>Copy List To Clipboard</a></li>" 
+    + "<li><a id='copy-list-and-labels'>Copy List And Labels To Clipboard</a></li>" 
     //+ "<li><a id='share'>Share To... (WIP)</a></li>"
   );
   
   // Listeners
-  $('#copy-to-clipboard').unbind('click').click(copyToClipboard);
+  $('#copy-list').unbind('click').click({includeLabels: false}, copyToClipboard);
+  $('#copy-list-and-labels').unbind('click').click({includeLabels: true}, copyToClipboard);
   //$('#share').unbind('click').click(share);
+}
+
+// jQuery gets to clean up actual functionality
+function $getList () {
+  null;
+}
+
+function $getCards () {
+  null;
+}
+
+function $getLabels () {
+  null;
 }
 
 // Option Functionality
 
-function getPlainText() {
-  var cards = lastButtonClicked.closest('.list').find('.list-cards .list-card')
-  var plainText = "";
-  for (var i = 0; i < cards.length; i++) { // Iterate over cards, get title
-    var titleObject = $(cards[i]).find('.list-card-title').contents().filter(function () { return this.nodeType === 3; })[0];
-    if (!titleObject) {break;} // So we don't accidentally try to find the title of the card composer.
-    var title = titleObject.data;
-    
-    // Iterate through labels, build label tag
+function getListTitle() {
+  var listTitle = lastButtonClicked.parents('.list-header').find('.list-header-name-assist').text();
+  return '----- ' + listTitle + " -----\n";
+}
+
+function getCardTitle(cards, i) {
+  var titleObject = $(cards[i]).find('.list-card-title').contents().filter(function () { return this.nodeType === 3; })[0];
+  if (!titleObject) {
+    return false;
+  } else {
+    return titleObject.data;
+  }
+}
+
+function getCardLabels(cards, i, includeLabels) {
+  var labels = "";
+  if (includeLabels) {
     var labelList = $(cards[i]).find('.list-card-labels');
-    var label = "";
-
     for (var n = 0; n < labelList.contents().length; n++) {
-
       var $currentLabel = $(labelList.contents()[n]);
 
-      if ($currentLabel.text() === '\xa0') {
-        var getColorRegEx = /card-label-([a-z]+?)/g;
-        var regExColor = getColorRegEx.exec($currentLabel.attr('class'));
-        label += " [" + regExColor[1].toUpperCase() + "]";
+      var getColorRegEx = /card-label-([a-z]+?)/g;
+      var labelColor = getColorRegEx.exec($currentLabel.attr('class'));
+  
+      if ($.inArray(labelColor[1], ignore) > -1 ) {
+        null;
+      } else if ($currentLabel.text() === '\xa0') {
+        labels += " [" + labelColor[1].toUpperCase() + "]";
       } else if ($currentLabel) {
-        label += " [" + $currentLabel.text() + "]";
+        labels += " [" + $currentLabel.text() + "]";
       }
     }
+  }
+  return labels;
+}
+
+function getPlainText(includeLabels) {
+  var plainText = getListTitle();
+  var cards = lastButtonClicked.closest('.list').find('.list-cards .list-card')
+  
+  for (var i = 0; i < cards.length; i++) { 
+    var title = getCardTitle(cards, i);
+    if (title === false) {break;}
+    var label = getCardLabels(cards, i, includeLabels);
 
     plainText += title + label + "\n";
   }
-  console.log(plainText); //for debugging
+
+  //console.log(plainText); //for debugging
   return plainText;
 }
 
-function copyToClipboard () {
+function copyToClipboard (event) {
   var copyFrom = document.createElement("textarea");
-  copyFrom.textContent = getPlainText();
+  copyFrom.textContent = getPlainText(event.data.includeLabels);
   document.body.appendChild(copyFrom);
   copyFrom.focus();
   document.execCommand('SelectAll');
@@ -86,15 +122,13 @@ function share() {
 // Notifications
 
 function spawnNotification(theBody, theIcon, theTitle) {
-  var options = {
-        body: theBody,
-        icon: theIcon
-    }
+  var options = { body: theBody, icon: theIcon }
   var n = new Notification(theTitle,options);
 }
 
 //Initialization
-
+var ignore = ['g'];
+  
 Notification.requestPermission().then(function(result) {  // Get permission for notifications
   console.log("TSU Notification permission: " + result);
 });
