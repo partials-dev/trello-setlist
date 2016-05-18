@@ -11,15 +11,26 @@ function addLastButtonListener() {
 
 // Add Options to Menu
 
+function listActionTimeout() {
+  var self = this;
+  setTimeout(function () {
+    if ($(self).find('.pop-over-header-title').contents()[0].data === "List Actions") {
+      addLi($(self).siblings().first().find('.pop-over-content .pop-over-list').first());
+    }
+  }, 50)
+}
+
 function addLi($list) {  
+  // List Actions
   $list.append(
     "<hr>"
     + "<li><a id='copy-to-clipboard'>Copy To Clipboard</a></li>" 
-    + "<li><a id='share'>Share To... (WIP)</a></li>"
+    //+ "<li><a id='share'>Share To... (WIP)</a></li>"
   );
-
+  
+  // Listeners
   $('#copy-to-clipboard').unbind('click').click(copyToClipboard);
-  $('#share').unbind('click').click(share);
+  //$('#share').unbind('click').click(share);
 }
 
 // Option Functionality
@@ -27,28 +38,31 @@ function addLi($list) {
 function getPlainText() {
   var cards = lastButtonClicked.closest('.list').find('.list-cards .list-card')
   var plainText = "";
-  for (var i = 0; i < cards.length; i++) {
+  for (var i = 0; i < cards.length; i++) { // Iterate over cards, get title
     var titleObject = $(cards[i]).find('.list-card-title').contents().filter(function () { return this.nodeType === 3; })[0];
-    if (!titleObject) {break;}
+    if (!titleObject) {break;} // So we don't accidentally try to find the title of the card composer.
     var title = titleObject.data;
-
+    
+    // Iterate through labels, build label tag
     var labelList = $(cards[i]).find('.list-card-labels');
     var label = "";
 
     for (var n = 0; n < labelList.contents().length; n++) {
-      if ($(labelList.contents()[n]).text() === '\xa0') {
 
+      var $currentLabel = $(labelList.contents()[n]);
+
+      if ($currentLabel.text() === '\xa0') {
         var getColorRegEx = /card-label-([a-z]+?)/g;
-        var regExColor = getColorRegEx.exec($(labelList.contents()[n]).attr('class'));
+        var regExColor = getColorRegEx.exec($currentLabel.attr('class'));
         label += " [" + regExColor[1].toUpperCase() + "]";
-      } else if ($(cards[i]).find('.card-label')[n]) {
-        label += " [" + $(labelList.contents()[n]).text() + "]";
+      } else if ($currentLabel) {
+        label += " [" + $currentLabel.text() + "]";
       }
     }
 
     plainText += title + label + "\n";
   }
-  console.log(plainText);
+  console.log(plainText); //for debugging
   return plainText;
 }
 
@@ -81,17 +95,9 @@ function spawnNotification(theBody, theIcon, theTitle) {
 
 //Initialization
 
-Notification.requestPermission().then(function(result) {
+Notification.requestPermission().then(function(result) {  // Get permission for notifications
   console.log("TSU Notification permission: " + result);
 });
 
-$(document).arrive(".js-open-list-menu", addLastButtonListener);
-$(document).arrive('.pop-over-header', function () {
-  var self = this;
-
-  setTimeout(function () {
-    if ($(self).find('.pop-over-header-title').contents()[0].data === "List Actions") {
-      addLi($(self).siblings().first().find('.pop-over-content .pop-over-list').first());
-    }
-  }, 50)
-});
+$(document).arrive(".js-open-list-menu", addLastButtonListener);  // Because apparently they take a second to load
+$(document).arrive('.pop-over-header', listActionTimeout); // Wait for the popover list to appear, inject extra option(s)
