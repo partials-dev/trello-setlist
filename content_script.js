@@ -30,35 +30,21 @@ function getPlainText() {
   for (var i = 0; i < cards.length; i++) {
     var titleObject = $(cards[i]).find('.list-card-title').contents().filter(function () { return this.nodeType === 3; })[0];
     if (!titleObject) {break;}
+    var title = titleObject.data;
 
-    var title = titleObject.data
+    var labelList = $(cards[i]).find('.list-card-labels');
+    var label = "";
 
-    if ($(cards[i]).find('.card-label').text() === '\xa0') {
+    for (var n = 0; n < labelList.contents().length; n++) {
+      if ($(labelList.contents()[n]).text() === '\xa0') {
 
-      // Implementation 1: slice
-      //var color = $(cards[i]).find('.card-label').attr('class').split('-')[3].slice(0,1);
-      //var label = " [" + color.toUpperCase() +"]";
-
-      // Implementation 2: regex capture group
-      var getColorRegEx = /card-label-([a-z]+?)/g;
-      var regExColor = getColorRegEx.exec($(cards[i]).find('.card-label').attr('class'));
-      var label = "RegEx: [" + regExColor[1].toUpperCase() + "]";
-
-      // Implementation 3: color cache
-      //var labelColors = ['green', 'yellow', 'orange', 'purple', 'sky', 'lime', 'pink', 'black', 'null'];
-      //var labelClass = $(cards[i]).find('.card-label').attr('class');
-      //var label = labelColors.filter(function (color) {
-        //var matchColor = new RegExp(color);
-        //return matchColor.test(labelClass);
-      //}).reduce(function (label, color) {
-        //label += " [" + color[0] + "]"
-        //return label;
-      //}, "");
-
-    } else if ($(cards[i]).find('.card-label')[0]) {
-      var label = " [" + $(cards[i]).find('.card-label').text() + "]";
-    } else {
-      var label = "";
+        var getColorRegEx = /card-label-([a-z]+?)/g;
+        var regExColor = getColorRegEx.exec($(labelList.contents()[n]).attr('class'));
+        label += " [" + regExColor[1].toUpperCase() + "]";
+        debugger;
+      } else if ($(cards[i]).find('.card-label')[n]) {
+        label += " [" + $(labelList.contents()[n]).text() + "]";
+      }
     }
 
     plainText += title + label + "\n";
