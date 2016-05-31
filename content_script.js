@@ -134,7 +134,7 @@ function spawnNotification(theBody, theIcon, theTitle) {
 }
 
 //Initialization
-var ignore = []; // ['g'] 
+var ignore = []; // ['g', 'r'] etc...
   
 Notification.requestPermission().then(function(result) {  // Get permission for notifications
   console.log("TSU Notification permission: " + result);
