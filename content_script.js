@@ -37,11 +37,16 @@ function addLi($list) {
 
 // jQuery gets to clean up actual functionality
 function $getList () {
-  null;
+  return lastButtonClicked.parents('.list');
 }
 
-function $getCards () {
-  null;
+function $getArrayOfCards () {
+  list = $getList();
+  return list.find('.list-cards .list-card');
+}
+
+function $getCurrentCard (i) {
+  return $($getArrayOfCards()[i]);
 }
 
 function $getLabels () {
@@ -51,8 +56,8 @@ function $getLabels () {
 // Option Functionality
 
 function getListTitle() {
-  var listTitle = lastButtonClicked.parents('.list-header').find('.list-header-name-assist').text();
-  return '----- ' + listTitle + " -----\n";
+  var listTitle = $getList().find('.list-header-name-assist').text();
+  return '----- ' + listTitle + " ----- \n";
 }
 
 function getCardTitle(cards, i) {
@@ -65,22 +70,23 @@ function getCardTitle(cards, i) {
 }
 
 function getCardLabels(cards, i, includeLabels) {
-  var labels = "";
-  if (includeLabels) {
-    var labelList = $(cards[i]).find('.list-card-labels');
-    for (var n = 0; n < labelList.contents().length; n++) {
-      var $currentLabel = $(labelList.contents()[n]);
-
-      var getColorRegEx = /card-label-([a-z]+?)/g;
-      var labelColor = getColorRegEx.exec($currentLabel.attr('class'));
+  var getColorRegEx = /card-label-([a-z]+?)/;
   
-      if ($.inArray(labelColor[1], ignore) > -1 ) {
-        null;
-      } else if ($currentLabel.text() === '\xa0') {
-        labels += " [" + labelColor[1].toUpperCase() + "]";
-      } else if ($currentLabel) {
-        labels += " [" + $currentLabel.text() + "]";
-      }
+  var labelList = $(cards[i]).find('.list-card-labels');
+  var labels = "";
+  
+  for (var n = 0; n < labelList.contents().length; n++) {
+    var $currentLabel = $(labelList.contents()[n]);
+    var labelText = $currentLabel.text();
+
+    var labelColor = getColorRegEx.exec($currentLabel.attr('class'))[1];
+
+    if ($.inArray(labelColor, ignore) > -1 ) { // Check if it's in ignored labels
+      null;
+    } else if (labelText === '\xa0') { // Use the color if no labeltext (contains a space by default)
+      labels += " [" + labelColor.toUpperCase() + "]";
+    } else if ($currentLabel) { // Use label text
+      labels += " [" + labelText + "]";
     }
   }
   return labels;
@@ -88,17 +94,18 @@ function getCardLabels(cards, i, includeLabels) {
 
 function getPlainText(includeLabels) {
   var plainText = getListTitle();
-  var cards = lastButtonClicked.closest('.list').find('.list-cards .list-card')
-  
+
+  var cards = $getArrayOfCards();
   for (var i = 0; i < cards.length; i++) { 
     var title = getCardTitle(cards, i);
+    
     if (title === false) {break;}
-    var label = getCardLabels(cards, i, includeLabels);
-
-    plainText += title + label + "\n";
+    
+    if (includeLabels) { title += getCardLabels(cards, i); }
+    plainText += title + "\n";
   }
 
-  //console.log(plainText); //for debugging
+  console.log(plainText); // for debugging
   return plainText;
 }
 
@@ -127,7 +134,7 @@ function spawnNotification(theBody, theIcon, theTitle) {
 }
 
 //Initialization
-var ignore = ['g'];
+var ignore = []; // ['g'] 
   
 Notification.requestPermission().then(function(result) {  // Get permission for notifications
   console.log("TSU Notification permission: " + result);
